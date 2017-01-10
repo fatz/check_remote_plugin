@@ -1,0 +1,32 @@
+{
+	"ImportPath": "github.com/fatz/check_remote_plugin",
+	"GoVersion": "go1.7",
+	"GodepVersion": "v75",
+	"Deps": [
+		{
+			"ImportPath": "github.com/jessevdk/go-flags",
+			"Comment": "v1.1-5-g4e64e4a",
+			"Rev": "4e64e4a4e2552194cf594243e23aa9baf3b4297e"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/curve25519",
+			"Rev": "c3b1d0d6d8690eaebe3064711b026770cc37efa3"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/ed25519",
+			"Rev": "c3b1d0d6d8690eaebe3064711b026770cc37efa3"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/ed25519/internal/edwards25519",
+			"Rev": "c3b1d0d6d8690eaebe3064711b026770cc37efa3"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/ssh",
+			"Rev": "c3b1d0d6d8690eaebe3064711b026770cc37efa3"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/ssh/agent",
+			"Rev": "c3b1d0d6d8690eaebe3064711b026770cc37efa3"
+		}
+	]
+}

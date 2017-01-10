@@ -1,0 +1,20 @@
+#!/bin/bash
+
+readonly OK=0
+readonly WARNING=1
+readonly CRITICAL=2
+readonly UNKNOWN=3
+
+message="dummy check"
+status="unknown"
+if [[ -n $1 ]]; then
+  status=$1
+fi
+
+if [[ -n $2 ]]; then
+  message=$2
+fi
+UCSTAT=`echo $status | tr '[:lower:]' '[:upper:]'`
+
+echo "$UCSTAT - $message"
+exit ${!UCSTAT}
