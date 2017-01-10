@@ -28,6 +28,7 @@ type Options struct {
 	CheckArgs          string `short:"o" long:"options" description:"the check options"`
 	PluginFolder       string `short:"f" long:"pluginfolder" description:"the folder for the plugins to use" default:"./local_plugins"`
 	RemotePluginFolder string `short:"r" long:"remotepluginfolder" description:"the remote plugin folder" default:"checks"`
+	Sudo               bool   `short:"s" long:"sudo" description:"let the plugin run with sudo"`
 }
 
 var (
@@ -228,7 +229,14 @@ func main() {
 	if opts.CheckArgs != "" {
 		args = " " + opts.CheckArgs
 	}
-	output, err := session.Output(opts.RemotePluginFolder + "/" + opts.Check + args)
+
+	sudo := ""
+
+	if opts.Sudo {
+		sudo = "sudo -H "
+	}
+
+	output, err := session.Output(sudo + opts.RemotePluginFolder + "/" + opts.Check + args)
 	if err != nil {
 		switch e := err.(type) {
 		case *ssh.ExitError:
