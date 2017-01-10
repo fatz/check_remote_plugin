@@ -25,7 +25,7 @@ type Options struct {
 	Password           string `short:"p" long:"password" description:"password to use"`
 	IdentityFile       string `short:"i" long:"identityfile" description:"key to use. Will ignored if passwordauth is true" default:"~/.ssh/id_rsa"`
 	Check              string `short:"c" long:"check" description:"the check to use" required:"true"`
-	CheckArgs          string `short:"o" long:"options" description:"the check options" default:"local_plugins"`
+	CheckArgs          string `short:"o" long:"options" description:"the check options"`
 	PluginFolder       string `short:"f" long:"pluginfolder" description:"the folder for the plugins to use" default:"./local_plugins"`
 	RemotePluginFolder string `short:"r" long:"remotepluginfolder" description:"the remote plugin folder" default:"checks"`
 }
