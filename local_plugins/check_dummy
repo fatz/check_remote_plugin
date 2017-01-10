@@ -5,7 +5,7 @@ readonly WARNING=1
 readonly CRITICAL=2
 readonly UNKNOWN=3
 
-message="dummy check"
+message="dummy check with user $USER"
 status="unknown"
 if [[ -n $1 ]]; then
   status=$1
