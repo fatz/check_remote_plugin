@@ -32,7 +32,7 @@ type Options struct {
 
 var (
 	opts       Options
-	parser     = flags.NewParser(&opts, flags.Default)
+	parser     = flags.NewParser(&opts, flags.HelpFlag|flags.PassDoubleDash)
 	authMethod []ssh.AuthMethod
 )
 
@@ -40,7 +40,7 @@ func getCheckFile(pluginFolder string, checkPlugin string) (checkFile string, er
 	checkFile, err = filepath.Abs(pluginFolder + "/" + checkPlugin)
 
 	if _, err := os.Stat(checkFile); os.IsNotExist(err) {
-		return "", fmt.Errorf("check %s does not exist", checkFile)
+		return "", fmt.Errorf("Check %s does not exist", checkFile)
 	}
 	return
 }
@@ -66,7 +66,7 @@ func checkOpts(opts *Options) error {
 	}
 
 	if _, err := getCheckFile(opts.PluginFolder, opts.Check); err != nil {
-		return fmt.Errorf("error getting check file: %s", err)
+		return fmt.Errorf("Error getting check file: %s", err)
 	}
 	return nil
 }
@@ -94,12 +94,12 @@ func getCertAuth(identityFile string) (authMethod []ssh.AuthMethod, err error) {
 	} else {
 		key, err := ioutil.ReadFile(identityFile)
 		if err != nil {
-			return authMethod, fmt.Errorf("unable to read private key: %v", err)
+			return authMethod, fmt.Errorf("Unable to read private key: %v", err)
 		}
 		signer, err := ssh.ParsePrivateKey(key)
 		signers = append(signers, signer)
 		if err != nil {
-			return authMethod, fmt.Errorf("unable to parse private key: %v", err)
+			return authMethod, fmt.Errorf("Unable to parse private key: %v", err)
 		}
 	}
 	return []ssh.AuthMethod{
@@ -110,7 +110,7 @@ func getCertAuth(identityFile string) (authMethod []ssh.AuthMethod, err error) {
 func remoteCheckSum(conn *ssh.Client, targetFolder string, targetFile string) (checksum [16]byte, err error) {
 	session, err := conn.NewSession()
 	if err != nil {
-		return checksum, fmt.Errorf("cant create session %s", err)
+		return checksum, fmt.Errorf("Can't create session %s", err)
 	}
 	cmd := fmt.Sprintf("md5sum %s/%s", targetFolder, targetFile)
 	output, err := session.Output(cmd)
@@ -120,14 +120,14 @@ func remoteCheckSum(conn *ssh.Client, targetFolder string, targetFile string) (c
 			err = fmt.Errorf("%s", output)
 			return
 		default:
-			err = fmt.Errorf("unable to run command: %s", err)
+			err = fmt.Errorf("Unable to run command: %s", err)
 			return
 		}
 	}
 	decode, err := hex.DecodeString(string(output[:32]))
 
 	if err != nil {
-		return checksum, fmt.Errorf("hex decode error %s", err)
+		return checksum, fmt.Errorf("Hex decode error %s", err)
 	}
 
 	copy(checksum[:], decode[:16])
@@ -138,7 +138,7 @@ func remoteCheckSum(conn *ssh.Client, targetFolder string, targetFile string) (c
 func copyCheck(conn *ssh.Client, targetFolder string, targetFile string, localFile string) (err error) {
 	content, err := ioutil.ReadFile(localFile)
 	if err != nil {
-		return fmt.Errorf("can't read file %s", localFile)
+		return fmt.Errorf("Can't read file %s", localFile)
 	}
 
 	localChecksum := md5.Sum(content)
@@ -149,7 +149,7 @@ func copyCheck(conn *ssh.Client, targetFolder string, targetFile string, localFi
 	session, err := conn.NewSession()
 
 	if err != nil {
-		return fmt.Errorf("cant create session %s", localFile)
+		return fmt.Errorf("Cant create session %s", localFile)
 	}
 	go func() {
 		w, _ := session.StdinPipe()
@@ -169,12 +169,17 @@ func copyCheck(conn *ssh.Client, targetFolder string, targetFile string, localFi
 func main() {
 	_, err := parser.Parse()
 	if err != nil {
-		fmt.Printf("UNKNWON - Error parsing argunments: %s\n", err)
-		os.Exit(3)
+		if flagsErr, ok := err.(*flags.Error); ok && flagsErr.Type == flags.ErrHelp {
+			fmt.Printf("%s", err)
+			os.Exit(0)
+		} else {
+			fmt.Printf("UNKNWON - Error parsing arguments: %s\n", err)
+			os.Exit(3)
+		}
 	}
 	err = checkOpts(&opts)
 	if err != nil {
-		fmt.Printf("UNKNOWN - Error in Options: %s\n", err)
+		fmt.Printf("UNKNOWN - Error in options: %s\n", err)
 		os.Exit(3)
 	}
 
@@ -183,7 +188,7 @@ func main() {
 	} else {
 		authMethod, err = getCertAuth(opts.IdentityFile)
 		if err != nil {
-			fmt.Printf("UNKNOWN - error creating auth %s", err)
+			fmt.Printf("UNKNOWN - Error creating auth %s", err)
 			os.Exit(3)
 		}
 	}
@@ -195,26 +200,27 @@ func main() {
 
 	conn, err := ssh.Dial("tcp", fmt.Sprintf("%s:%d", opts.Hostname, opts.Port), config)
 	if err != nil {
-		fmt.Printf("UNKNWON - unable to connect: %s", err)
+
+		fmt.Printf("UNKNWON - Unable to connect: %s", err)
 		os.Exit(3)
 	}
 
 	localCheck, _ := getCheckFile(opts.PluginFolder, opts.Check)
 	err = copyCheck(conn, opts.RemotePluginFolder, opts.Check, localCheck)
 	if err != nil {
-		fmt.Printf("UNKNOWN - copyCheck error %s", err)
+		fmt.Printf("UNKNOWN - Copy check error %s", err)
 		os.Exit(3)
 	}
 
 	defer conn.Close()
 	session, err := conn.NewSession()
 	if err != nil {
-		fmt.Printf("UNKNOWN - unable to create session: %s", err)
+		fmt.Printf("UNKNOWN - Unable to create session: %s", err)
 		os.Exit(3)
 	}
 
 	if err != nil {
-		fmt.Printf("UNKNOWN - copy error: %s", err)
+		fmt.Printf("UNKNOWN - Copy error: %s", err)
 		os.Exit(3)
 	}
 	args := ""
@@ -229,7 +235,7 @@ func main() {
 			fmt.Printf("%s", output)
 			os.Exit(e.ExitStatus())
 		default:
-			fmt.Printf("UNKNOWN - unable to run command: %s", err)
+			fmt.Printf("UNKNOWN - Unable to run command: %s", err)
 			os.Exit(3)
 		}
 	}
